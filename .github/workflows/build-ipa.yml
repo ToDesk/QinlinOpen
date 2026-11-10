@@ -2,6 +2,10 @@ name: Build unsigned IPA
 
 on:
   workflow_dispatch:
+  schedule:
+    # UTC 18:00 / 20:00 = 北京时间次日 02:00 / 04:00，低峰时段自动重试
+    - cron: '0 18 * * *'
+    - cron: '0 20 * * *'
   push:
     branches: [ main ]
     paths:
