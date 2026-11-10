@@ -1,0 +1,55 @@
+name: Build unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/build-ipa.yml'
+
+defaults:
+  run:
+    working-directory: ios
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Build app (no signing)
+        run: |
+          xcodebuild \
+            -project QinlinOpen.xcodeproj \
+            -scheme QinlinOpen \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PRODUCT_BUNDLE_IDENTIFIER=top.rpone.qinlinopen \
+            build
+
+      - name: Package into .ipa
+        run: |
+          mkdir -p out/Payload
+          cp -R build/Build/Products/Release-iphoneos/QinlinOpen.app out/Payload/
+          cd out
+          zip -qr QinlinOpen-unsigned.ipa Payload
+          ls -lh QinlinOpen-unsigned.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QinlinOpen-unsigned-ipa
+          path: ios/out/QinlinOpen-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 7
