@@ -14,12 +14,7 @@ defaults:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        runner: [ macos-latest, macos-13, macos-15 ]
-    runs-on: ${{ matrix.runner }}
-    continue-on-error: true
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -55,7 +50,7 @@ jobs:
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ipa-${{ matrix.runner }}
+          name: QinlinOpen-unsigned-ipa
           path: ios/out/QinlinOpen-unsigned.ipa
           if-no-files-found: error
           retention-days: 7
